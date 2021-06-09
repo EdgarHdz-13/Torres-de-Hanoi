@@ -2,7 +2,7 @@
 .eqv	direccion_inicial 0x1001  
 .text
 		
-		addi	$s0,$zero,2				#Tamaño de la torre de hanoi
+		addi	$s0,$zero,3				#Tamaño de la torre de hanoi
 		#Construcción de la torre de Hanoi
 		
 		#La dirección de las 3 torres de Hanoi como mi intención es hacerlo vertical se podria decir que desperdicio memoria pero es más visual e integro la memoria alineada 2 x 1
@@ -41,8 +41,8 @@ ciclo_1:
 		jal	apilar
 		addi	$t2,$t2,-1
 		j	ciclo_1		
-termina_ciclo_1:
-		add	$t0,$zero,$a1
+termina_ciclo_1:#Aqui digo que se desapilará de Origen y se pondra en Auxiliar 
+		add	$t4,$zero,$a1
 		addi	$t1,$zero,1
 		addi	$t2,$zero,2
 		addi	$t3,$zero,3
@@ -50,9 +50,9 @@ termina_ciclo_1:
 								
 		j exit
 		
-Hanoi:		#t0 = n, t1 = origen, t2 = auxiliar, t3 = destino, borra t9
+Hanoi:		#t4 = n, t1 = origen, t2 = auxiliar, t3 = destino, borra t9
 		addi	$t9,$zero,1
-		bne	$t0,$t9,else
+		bne	$t4,$t9,else
 		#Si llega aqui ya empezo a apilar y desapilar
 		addi	$sp,$sp,-4
 		sw	$ra,4($sp)
@@ -63,14 +63,19 @@ Hanoi:		#t0 = n, t1 = origen, t2 = auxiliar, t3 = destino, borra t9
 		jr	$ra		
 else:
 		addi 	$sp,$sp,-20
-		sw	$t0,4($sp)
+		sw	$t4,4($sp)
 		sw	$t1,8($sp)
-		sw	$t3,12($sp)
-		sw	$t2,16($sp)
+		sw	$t2,12($sp)
+		sw	$t3,16($sp)
 		sw	$ra,20($sp)
-		addi	$t0,$t0,-1
+		
+		lw	$t1,8($sp)
+		lw	$t3,12($sp)
+		lw	$t2,16($sp)
+		
+		addi	$t4,$t4,-1
 		jal	Hanoi
-		lw	$t0,4($sp)
+		lw	$t4,4($sp)
 		lw	$t1,8($sp)
 		lw	$t2,12($sp)
 		lw	$t3,16($sp)
@@ -85,14 +90,18 @@ else:
 		addi	$sp,$sp,4
 		
 		addi 	$sp,$sp,-20
-		sw	$t0,4($sp)
+		sw	$t4,4($sp)
 		sw	$t1,8($sp)
 		sw	$t2,12($sp)
 		sw	$t3,16($sp)
 		sw	$ra,20($sp)
-		addi	$t0,$t0,-1
+		
+		lw	$t2,8($sp)
+		lw	$t1,12($sp)
+		lw	$t3,16($sp)
+		addi	$t4,$t4,-1
 		jal	Hanoi
-		lw	$t0,4($sp)
+		lw	$t4,4($sp)
 		lw	$t1,8($sp)
 		lw	$t2,12($sp)
 		lw	$t3,16($sp)
