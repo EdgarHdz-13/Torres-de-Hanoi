@@ -2,7 +2,7 @@
 .eqv	direccion_inicial 0x1001  
 .text
 		
-		addi	$s0,$zero,1				#Tamaño de la torre de hanoi
+		addi	$s0,$zero,2				#Tamaño de la torre de hanoi
 		#Construcción de la torre de Hanoi
 		
 		#La dirección de las 3 torres de Hanoi como mi intención es hacerlo vertical se podria decir que desperdicio memoria pero es más visual e integro la memoria alineada 2 x 1
@@ -62,15 +62,50 @@ Hanoi:		#t0 = n, t1 = origen, t2 = auxiliar, t3 = destino, borra t9
 		addi	$sp,$sp,4
 		jr	$ra		
 else:
-
+		addi 	$sp,$sp,-20
+		sw	$t0,4($sp)
+		sw	$t1,8($sp)
+		sw	$t3,12($sp)
+		sw	$t2,16($sp)
+		sw	$ra,20($sp)
+		addi	$t0,$t0,-1
+		jal	Hanoi
+		lw	$t0,4($sp)
+		lw	$t1,8($sp)
+		lw	$t2,12($sp)
+		lw	$t3,16($sp)
+		lw	$ra,20($sp)
+		addi 	$sp,$sp,20
 		
-				
+		addi	$sp,$sp,-4
+		sw	$ra,4($sp)
+		jal	desapilar
+		jal 	apilar
+		lw	$ra,4($sp)
+		addi	$sp,$sp,4
+		
+		addi 	$sp,$sp,-20
+		sw	$t0,4($sp)
+		sw	$t1,8($sp)
+		sw	$t2,12($sp)
+		sw	$t3,16($sp)
+		sw	$ra,20($sp)
+		addi	$t0,$t0,-1
+		jal	Hanoi
+		lw	$t0,4($sp)
+		lw	$t1,8($sp)
+		lw	$t2,12($sp)
+		lw	$t3,16($sp)
+		lw	$ra,20($sp)
+		addi 	$sp,$sp,20
+		
+		jr	$ra
 						
 								
 										
 														
 		
-apilar:		#(t0 = Dato, t3 = Torre de Hanoi  1, 2 ,3  t9 = borra)
+apilar:		#(t0 = input Dato, t3 = Torre de Hanoi  1, 2 ,3  t9 = borra)
 		addi	$t9,$zero,1
 		bne	$t3,$t9,case_2_a
 		addi	$s1,$s1,-0x20				#Antes lo habia puesto después, pero para contar el 0 este addi lo puse antes de sw
@@ -91,7 +126,7 @@ case_3_a:	#Podria poner un default, pero confio que no pondré mal esto en el fut
 		addi	$a3,$a3,1
 		jr	$ra
 		
-desapilar:	#(t0 = dato de salida, t1 = Torre de Hanoi  1, 2 ,3  Borra t9)
+desapilar:	#(t0 = Output dato, t1 = Torre de Hanoi  1, 2 ,3  Borra t9)
 		addi	$t9,$zero,1
 		bne	$t1,$t9,case_2_d
 		lw	$t0,0($s1)
