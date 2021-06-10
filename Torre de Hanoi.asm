@@ -5,7 +5,7 @@
 .eqv	direccion_inicial 0x1001  
 .text
 		#Datos inicial
-		addi	$s0,$zero,5				#Tamaño de la torre de hanoi
+		addi	$s0,$zero,4				#Tamaño de la torre de hanoi
 		#Construcción de la torre de Hanoi
 		#La dirección de las 3 torres de Hanoi como mi intención es hacerlo vertical se podria decir que desperdicio memoria pero es más visual e integro la memoria alineada 2 x 1
 		addi	$s1,$zero,0				#dirección origen
@@ -29,13 +29,13 @@
 		add	$s3,$s3,$t0				
 		
 		#Tamaño de las torres de Hanoi
-		add	$a1,$zero,0				#tamaño origen
-		add	$a2,$zero,0				#tamaño auxiliar
-		add	$a3,$zero,0				#tamaño destino
+		addi	$a1,$zero,0				#tamaño origen
+		addi	$a2,$zero,0				#tamaño auxiliar
+		addi	$a3,$zero,0				#tamaño destino
 		
 main:		#Empiezo a guardar mis aros (números) desde lo más alto de la memoria hasta lo más bajo para que quede vista de manera vertical ascendente
 		add	$t0,$zero,$s0	
-		addi	$t3,$zero,1				#como no hay nada que cambia $t3 optimizo la cantidad de codigo que hago
+		addi	$t3,$zero,1				#Que torre queremos contruirla con n cantidad de discos
 		
 ciclo_1:	#preparo la función apilar en t0 pongo el dato que quiero poner y lo voy comparando con el tamaño deseado
 		jal	apilar
@@ -43,10 +43,10 @@ ciclo_1:	#preparo la función apilar en t0 pongo el dato que quiero poner y lo vo
 		bne	$t0,$zero,ciclo_1
 
 		#Aqui voy configurando mi torre de Hanoi, en t4 = tamaño de torre 1, t1 = origen, t2 = auxiliar, t3 = destino
-		add	$t4,$zero,$a1
-		addi	$t1,$zero,1
-		addi	$t2,$zero,2
-		addi	$t3,$zero,3
+		add	$t4,$zero,$a1				#También tengo que agregar el tamaño de la torre que estoy utilizando
+		addi	$t1,$zero,1				#Que torre es la de origen
+		addi	$t2,$zero,2				#Que torre es la de auxiliar
+		addi	$t3,$zero,3				#Que torre se la de destino
 		jal 	Hanoi
 								
 		j exit
@@ -75,8 +75,7 @@ else:
 		sw	$t2,12($sp)
 		sw	$t3,16($sp)
 		sw	$ra,20($sp)
-		#Cambio el auxiliar y el destino para seguir el formato del codigo recursivo Hanoi(n-1,o,d,a) -> Hanoi(n-1,o,a,d) se podria decir que guardo el movimiento o -> a
-		lw	$t1,8($sp)
+		#Cambio el auxiliar y el destino para seguir el formato del codigo recursivo Hanoi(n-1,o,d,a) -> Hanoi(n-1,o,a,d) se podria decir que guardo el movimiento o -> d
 		lw	$t3,12($sp)
 		lw	$t2,16($sp)
 		#Bajo el contador de cuantos aros tiene nuestra torre de destino
@@ -106,7 +105,6 @@ else:
 		#Ahora hago el cambio entre las entradas origen y destino, se puede decir que se guarda el movimiento de a -> d
 		lw	$t2,8($sp)
 		lw	$t1,12($sp)
-		lw	$t3,16($sp)
 		#aqui también necesito que bajar el tamaño temporal de la torre origen
 		addi	$t4,$t4,-1
 		jal	Hanoi
