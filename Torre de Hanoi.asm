@@ -36,13 +36,13 @@
 main:		#Empiezo a guardar mis aros (números) desde lo más alto de la memoria hasta lo más bajo para que quede vista de manera vertical ascendente
 		add	$a0,$zero,$s0	
 		addi	$a3,$zero,1				#Que torre queremos contruirla con n cantidad de discos
-			#preparo la función apilar en t0 pongo el dato que quiero poner y lo voy comparando con el tamaño deseado
+								#preparo la función apilar en a3 pongo el dato que quiero poner y lo voy comparando con el tamaño deseado
 ciclo:		beq	$a0,$zero,ciclo_exit
 		jal	apilar
 		addi	$a0,$a0,-1
 		j	ciclo
 ciclo_exit:
-		#Aqui voy configurando mi torre de Hanoi, en t4 = tamaño de torre 1, t1 = origen, t2 = auxiliar, t3 = destino
+		#Aqui voy configurando mi torre de Hanoi, en a0 = tamaño de torre 1, a1 = origen, a2 = auxiliar, a3 = destino
 		add	$a0,$zero,$t4				#También tengo que agregar el tamaño de la torre que estoy utilizando
 		addi	$a1,$zero,1				#Que torre es la de origen
 		addi	$a2,$zero,2				#Que torre es la de auxiliar
@@ -60,7 +60,7 @@ Hanoi:		#a0 = n, a1 = origen, a2 = auxiliar, a3 = destino
 		sw	$a3,12($sp)
 		sw	$ra,16($sp)
 		#Si el tamaño es menor que 1 hay 2 opciones, que sea un error o sea del tamaño de 1 por lo que
-		slti	$at,$a0,1		#at = t4<1 ? 1:0
+		slti	$at,$a0,1		#at = a0<1 ? 1:0
 		bne	$at,$zero,Hanoi_error
 		
 		addi	$at,$zero,1
@@ -68,9 +68,9 @@ Hanoi:		#a0 = n, a1 = origen, a2 = auxiliar, a3 = destino
 		
 		addi	$sp,$sp,-4				#como desapilar y apilar cambian el $ra necesito que guardarlo antes de hacer estas funciones y después cargarlo
 		sw	$ra,4($sp)				
-		jal	desapilar				#hice de manera estrategica que la entrada de desapilar sea t1 (origen de función Hanoi) y el dato se guardara en t0
-		add	$a0,$0,$v0
-		jal 	apilar					#lo que hace que t0 funcioné como entrada de apilar y t3 (destino de función hanoi) sea en que torre quiero que se guarde 
+		jal	desapilar				#hice de manera estrategica que la entrada de desapilar sea t1 (origen de función Hanoi) y el dato se guardara en v0
+		add	$a0,$0,$v0				#a0 como no lo vuelvo a utilizar aqui pued usarlo de entrada para apilar, lo cual manda el dato desapilado a la torre de destino
+		jal 	apilar					#lo que hace que a0 funcioné como entrada de apilar y a3 (destino de función hanoi) sea en que torre quiero que se guarde 
 		lw	$ra,4($sp)				
 		addi	$sp,$sp,4
 		
@@ -92,9 +92,9 @@ Hanoi_recursivo:
 		
 		addi	$sp,$sp,-4				#como desapilar y apilar cambian el $ra necesito que guardarlo antes de hacer estas funciones y después cargarlo
 		sw	$ra,0($sp)				
-		jal	desapilar				#hice de manera estrategica que la entrada de desapilar sea t1 (origen de función Hanoi) y el dato se guardara en t0
+		jal	desapilar				#desapilo lo de a1
 		add	$a0,$0,$v0
-		jal 	apilar					#lo que hace que t0 funcioné como entrada de apilar y t3 (destino de función hanoi) sea en que torre quiero que se guarde 
+		jal 	apilar					#a0 funciona como entrada de apilar y a3 (destino de función hanoi) sea en que torre quiero que se guarde 
 		lw	$ra,0($sp)				
 		addi	$sp,$sp,4
 		#Si llego aqui los cambia entre auxiliar y origen al momento de guardar
@@ -119,7 +119,7 @@ Hanoi_error:	addi 	$sp,$sp,20
 apilar:		#(a0 = input Dato, a3 = Torre de Hanoi  1, 2 ,3 )
 		addi	$at,$zero,1
 		bne	$a3,$at,case_2_a
-		#Aqui si se escogio la torre 1, apilo en donde me apunta $s1(Dirección torre de hanoi 1) el dato $t0
+		#Aqui si se escogio la torre 1, apilo en donde me apunta $t1(Dirección torre de hanoi 1) el dato $t0
 		addi	$t1,$t1,-0x20				#Antes lo habia puesto después, pero para contar el 0 este addi lo puse antes de sw
 		sw	$a0,0($t1)
 		addi	$t4,$t4,1
@@ -127,13 +127,13 @@ apilar:		#(a0 = input Dato, a3 = Torre de Hanoi  1, 2 ,3 )
 		
 case_2_a:	addi	$at,$zero,2
 		bne	$a3,$at,case_3_a
-		#Aqui si se escogio la torre 2, apilo en donde me apunta $s2(Dirección torre de hanoi 2) el dato $t0
+		#Aqui si se escogio la torre 2, apilo en donde me apunta $t2(Dirección torre de hanoi 2) el dato $a0
 		addi	$t2,$t2,-0x20
 		sw	$a0,0($t2)
-		addi	$t6,$t6,1
+		addi	$t5,$t5,1
 		jr	$ra
 		
-case_3_a:	#Podria poner un default, pero confio que no pondré mal esto en el futuro y apila donde apunta $s3(Dirección torre de Hanoi 3) el dato $t0
+case_3_a:	#Podria poner un default, pero confio que no pondré mal esto en el futuro y apila donde apunta $t3(Dirección torre de Hanoi 3) el dato $a0
 		addi	$t3,$t3,-0x20
 		sw	$a0,0($t3)
 		addi	$t6,$t6,1
@@ -142,7 +142,7 @@ case_3_a:	#Podria poner un default, pero confio que no pondré mal esto en el fut
 desapilar:	#(v0 = Output dato, a1 = Torre de Hanoi  1, 2 ,3 )
 		addi	$at,$zero,1
 		bne	$a1,$at,case_2_d
-		#Aqui si se escogio la torre 1, desapilo en donde me apunta $s1(Dirección torre de hanoi 1) y guardo el dato en $t0
+		#Aqui si se escogio la torre 1, desapilo en donde me apunta $t1(Dirección torre de hanoi 1) y guardo el dato en $v0
 		lw	$v0,0($t1)
 		sw	$zero,0($t1)
 		addi	$t1,$t1,0x0020
@@ -151,19 +151,19 @@ desapilar:	#(v0 = Output dato, a1 = Torre de Hanoi  1, 2 ,3 )
 		
 case_2_d:	addi	$at,$zero,2
 		bne	$a1,$at,case_3_d
-		#Aqui si se escogio la torre 2, desapilo en donde me apunta $s2(Dirección torre de hanoi 2) y guardo el dato en $t0
+		#Aqui si se escogio la torre 2, desapilo en donde me apunta $t2(Dirección torre de hanoi 2) y guardo el dato en $a0
 		lw	$v0,0($t2)
 		sw	$zero,0($t2)
 		addi	$t2,$t2,0x0020
 		addi	$t5,$t5,-1
 		jr	$ra
 		
-case_3_d:	#Podria poner un default, pero confio que no pondré mal esto en el futuro y desapila donde apunta $s3(Dirección torre de Hanoi 3) y guarda el dato en $t0
+case_3_d:	#Podria poner un default, pero confio que no pondré mal esto en el futuro y desapila donde apunta $t3(Dirección torre de Hanoi 3) y guarda el dato en $a0
 		lw	$v0,0($t3)
 		sw	$zero,0($t3)
 		addi	$t3,$t3,0x0020
 		addi	$t6,$t6,-1
 		jr	$ra
 		
-exit:
+exit:		#salida para ver si todo funcionó bien en Hanoi
 		
