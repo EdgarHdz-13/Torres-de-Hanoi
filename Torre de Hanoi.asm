@@ -20,14 +20,16 @@
 		addi	$t3,$t3,8
 		
 		
-		addi	$at,$zero,0x0020
-		mul	$at,$s0,$at
+		add	$at,$0,$s0
+dir_ciclo:	beq	$at,$0,dir_exit
 		#Quiero que aparte de ser vertical, sea escalonada hacia arriba, por lo que la posición inicial tiene que ser la parte de la memoria más alta en memoria para esa "torre"
 		#y la dirección ir restandolo de 20h a 20h para ir subiendo la torre de hanoi 
-		add	$t1,$t1,$at				
-		add	$t2,$t2,$at				
-		add	$t3,$t3,$at				
-		
+		addi	$t1,$t1,0x0020				
+		addi	$t2,$t2,0x0020					
+		addi	$t3,$t3,0x0020	
+		addi	$at,$at,-1
+		j	dir_ciclo				
+dir_exit:
 		#Tamaño de las torres de Hanoi
 		addi	$t4,$zero,0				#tamaño origen
 		addi	$t5,$zero,0				#tamaño auxiliar
@@ -60,9 +62,6 @@ Hanoi:		#a0 = n, a1 = origen, a2 = auxiliar, a3 = destino
 		sw	$a3,12($sp)
 		sw	$ra,16($sp)
 		#Si el tamaño es menor que 1 hay 2 opciones, que sea un error o sea del tamaño de 1 por lo que
-		slti	$at,$a0,1		#at = a0<1 ? 1:0
-		bne	$at,$zero,Hanoi_error
-		
 		addi	$at,$zero,1
 		bne	$a0,$at,Hanoi_recursivo
 		
@@ -108,12 +107,13 @@ Hanoi_recursivo:
 		j	Hanoi_return
 		 		
 			
-Hanoi_return:	lw	$a0,0($sp)
+Hanoi_return:	
+		lw	$a0,0($sp)
 		lw	$a1,4($sp)
 		lw	$a2,8($sp)
 		lw	$a3,12($sp)
 		lw	$ra,16($sp)
-Hanoi_error:	addi 	$sp,$sp,20
+		addi 	$sp,$sp,20
 		jr	$ra													
 		
 apilar:		#(a0 = input Dato, a3 = Torre de Hanoi  1, 2 ,3 )
